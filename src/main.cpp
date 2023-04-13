@@ -9,6 +9,7 @@ extern "C"
 #include "main.h"
 #include <stdio.h>
 #include "bsp/bsp_debug_usart.h"
+#include "bsp/bsp_led.h"
 }
 
 int main()
@@ -17,6 +18,8 @@ int main()
     SystemClock_Config();
     /* 初始化串口 */
     DEBUG_USART_Config();
+    /* 初始化 LED */
+    LED_GPIO_Config();
     cout << "STM32 F767IGT6 调试串口初始化成功！" << endl;
     while (1)
     {
