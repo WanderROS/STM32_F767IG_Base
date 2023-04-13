@@ -11,6 +11,7 @@ extern "C"
 #include "bsp/bsp_debug_usart.h"
 #include "bsp/bsp_led.h"
 #include "bsp/bsp_qspi_flash.h"
+#include "bsp/bsp_sdram.h"
 }
 #define FLASH_WriteAddress 0x00000
 #define FLASH_ReadAddress FLASH_WriteAddress
@@ -50,7 +51,9 @@ int main()
     {
         printf("\r\n获取不到 W25Q128 ID!\n\r");
     }
-
+    /*初始化SDRAM模块*/
+    SDRAM_Init();
+    SDRAM_Test();
     while (1)
     {
         HAL_Delay(1000);
