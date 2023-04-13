@@ -10,10 +10,18 @@ extern "C"
 #include <stdio.h>
 #include "bsp/bsp_debug_usart.h"
 #include "bsp/bsp_led.h"
+#include "bsp/bsp_qspi_flash.h"
 }
-
+#define FLASH_WriteAddress 0x00000
+#define FLASH_ReadAddress FLASH_WriteAddress
+#define FLASH_SectorToErase FLASH_WriteAddress
+uint8_t Rx_Buffer[100];
 int main()
 {
+    // 读取的 Flash ID 存储位置
+    __IO uint32_t DeviceID = 0;
+    __IO uint32_t FlashID = 0;
+
     /* 系统时钟初始化成216 MHz */
     SystemClock_Config();
     /* 初始化串口 */
@@ -21,6 +29,28 @@ int main()
     /* 初始化 LED */
     LED_GPIO_Config();
     cout << "STM32 F767IGT6 调试串口初始化成功！" << endl;
+    /* 16M 串行 flash W25Q128 初始化 */
+    QSPI_FLASH_Init();
+    /* 获取 Flash Device ID */
+    DeviceID = QSPI_FLASH_ReadDeviceID();
+    HAL_Delay(200);
+
+    /* 获取 SPI Flash ID */
+    FlashID = QSPI_FLASH_ReadID();
+    printf("\r\nFlashID is 0x%X,  Manufacturer Device ID is 0x%X\r\n", FlashID, DeviceID);
+    /* 检验 SPI Flash ID */
+    if (FlashID == sFLASH_ID)
+    {
+        printf("\r\n检测到QSPI FLASH W25Q128 !\r\n");
+        /* 将刚刚写入的数据读出来放到接收缓冲区中 */
+        BSP_QSPI_Read(Rx_Buffer, FLASH_ReadAddress, 100);
+        printf("\r\n读出的数据为：\r\n%s", Rx_Buffer);
+    }
+    else
+    {
+        printf("\r\n获取不到 W25Q128 ID!\n\r");
+    }
+
     while (1)
     {
         HAL_Delay(1000);
