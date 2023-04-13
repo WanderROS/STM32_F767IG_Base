@@ -375,7 +375,7 @@ void SDRAM_WriteBuffer(uint32_t *pBuffer, uint32_t uwWriteAddress, uint32_t uwBu
     /* 禁止写保护 */
     HAL_SDRAM_WriteProtection_Disable(&hsdram1);
     /* 检查SDRAM标志，等待至SDRAM空闲 */
-    while (HAL_SDRAM_GetState(&hsdram1) != RESET)
+    while (HAL_SDRAM_GetState(&hsdram1) != HAL_SDRAM_STATE_RESET)
     {
     }
 
@@ -402,7 +402,7 @@ void SDRAM_ReadBuffer(uint32_t *pBuffer, uint32_t uwReadAddress, uint32_t uwBuff
     __IO uint32_t write_pointer = (uint32_t)uwReadAddress;
 
     /* 检查SDRAM标志，等待至SDRAM空闲 */
-    while (HAL_SDRAM_GetState(&hsdram1) != RESET)
+    while (HAL_SDRAM_GetState(&hsdram1) != HAL_SDRAM_STATE_RESET)
     {
     }
 
