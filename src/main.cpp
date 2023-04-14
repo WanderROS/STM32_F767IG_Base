@@ -27,7 +27,7 @@ extern "C"
     UINT fnum;                   /* 文件成功读写数量 */
     BYTE ReadBuffer[1024] = {0}; /* 读缓冲区 */
     BYTE WriteBuffer[] =         /* 写缓冲区*/
-        "欢迎使用野火STM32 F767开发板 今天是个好日子，新建文件系统测试文件\r\n";
+        "测试文件系统2.0\r\n";
     extern FATFS flash_fs;
     extern Diskio_drvTypeDef QSPI_Driver;
 }
@@ -35,6 +35,7 @@ extern "C"
 #define FLASH_ReadAddress FLASH_WriteAddress
 #define FLASH_SectorToErase FLASH_WriteAddress
 uint8_t Rx_Buffer[100];
+
 int main()
 {
 
@@ -87,7 +88,7 @@ int main()
     /*----------------------- 文件系统测试：写测试 -----------------------------*/
     /* 打开文件，如果文件不存在则创建它 */
     printf("\r\n****** 即将进行文件写入测试... ******\r\n");
-    res_flash = f_open(&fnew, "0:FatFs读写测试文件.txt", FA_CREATE_ALWAYS | FA_WRITE);
+    res_flash = f_open(&fnew, "0:Nice.txt", FA_CREATE_ALWAYS | FA_WRITE);
     if (res_flash == FR_OK)
     {
         printf("》打开/创建FatFs读写测试文件.txt文件成功，向文件写入数据。\r\n");
@@ -111,7 +112,7 @@ int main()
     }
     /*------------------- 文件系统测试：读测试 ------------------------------------*/
     printf("****** 即将进行文件读取测试... ******\r\n");
-    res_flash = f_open(&fnew, "0:FatFs读写测试文件.txt", FA_OPEN_EXISTING | FA_READ);
+    res_flash = f_open(&fnew, "0:Hello.txt", FA_OPEN_EXISTING | FA_READ);
     if (res_flash == FR_OK)
     {
         printf("》打开文件成功。\r\n");
@@ -132,7 +133,35 @@ int main()
     }
     /* 不再读写，关闭文件 */
     f_close(&fnew);
-
+    DIR dir;
+    static FILINFO fno;
+    // 查看根目录下有哪些文件并通过串口输出
+    res_flash = f_opendir(&dir, "");
+    if (res_flash == FR_OK)
+    {
+        printf("打开根目录成功！\n");
+    }
+    for (int i = 0;; i++)
+    {
+        res_flash = f_readdir(&dir, &fno); // 读取目录项，索引会自动移到下一项
+        if (res_flash != FR_OK || fno.fname[0] == 0)
+        {
+            break; // 说明没有文件
+        }
+        if (fno.fname[0] == '.')
+        {
+            continue;
+        }
+        if (fno.fattrib & AM_DIR) // 判断是文件还是子目录
+        {
+            printf("(0x%02d)目录", fno.fattrib);
+        }
+        else
+        {
+            printf("(0x%02d)文件", fno.fattrib);
+        }
+        printf("名称为：%s\r\n", (char *)fno.fname);
+    }
     /*
      *
      * 不再使用文件系统，取消挂载文件系统
