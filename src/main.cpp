@@ -2,6 +2,8 @@
 using namespace std;
 #include "ArduinoJson.h"
 #include "commandParser.h"
+#include <unordered_map>
+#include "cmdDisplay.hpp"
 // C 库依赖
 extern "C"
 {
@@ -172,6 +174,17 @@ int main()
     /*初始化SDRAM模块*/
     SDRAM_Init();
     SDRAM_Test();
+    unordered_map<string, int> map;
+    map["孙"] = 0;
+    map["李"] = 1;
+    map["张"] = 2;
+    for (auto h : map)
+    {
+        cout << h.first << "->" << h.second << endl;
+    }
+    CmdDisplay cmdDisplay;
+    Commander *commander=&cmdDisplay;
+    commander->cmdHelp();
     while (1)
     {
         HAL_Delay(10);
