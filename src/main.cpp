@@ -1,6 +1,7 @@
 #include <iostream>
 using namespace std;
-
+#include "ArduinoJson.h"
+#include "commandParser.h"
 // C 库依赖
 extern "C"
 {
@@ -173,7 +174,8 @@ int main()
     SDRAM_Test();
     while (1)
     {
-        HAL_Delay(1000);
+        HAL_Delay(10);
+        commandProcess();
     }
     return 0;
 }

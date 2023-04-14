@@ -166,11 +166,40 @@ void SysTick_Handler(void)
 /******************************************************************************/
 
 extern uint8_t ucUartRecvTemp;
+// 接收字符串最大缓冲区
+#define DEBUG_RECV_BUFFER_SIZE 1024
+uint8_t ucDebugRecvBuffer[DEBUG_RECV_BUFFER_SIZE];
+uint16_t ulDebugRecvCount = 0;
+uint16_t ulDebugRecvSize;
+uint8_t ucDebugRecvReady = FALSE;
 void DEBUG_USART_IRQHandler(void)
 {
   if (__HAL_UART_GET_IT(&UartHandle, UART_IT_RXNE) != RESET)
   {
     HAL_UART_Receive(&UartHandle, (uint8_t *)&ucUartRecvTemp, 1, 1000);
+    // 接收数据超过缓冲区大小
+    if (ulDebugRecvCount >= DEBUG_RECV_BUFFER_SIZE)
+    {
+      ulDebugRecvCount = 0;
+      ucDebugRecvReady = FALSE;
+      printf("串口接收一行内容超过缓冲区大小,放弃处理.\n");
+    }
+    else
+    {
+      ucDebugRecvBuffer[ulDebugRecvCount] = ucUartRecvTemp;
+      // 回车
+      if (ucDebugRecvBuffer[ulDebugRecvCount] == '\n')
+      {
+        // 当前串口接收字符串内容长度
+        ulDebugRecvSize = ulDebugRecvCount;
+        ulDebugRecvCount = 0;
+        ucDebugRecvReady = TRUE;
+      }
+      else
+      {
+        ulDebugRecvCount++;
+      }
+    }
   }
 
   HAL_UART_IRQHandler(&UartHandle);
