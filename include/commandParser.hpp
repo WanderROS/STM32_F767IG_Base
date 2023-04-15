@@ -21,14 +21,14 @@ class CommandParser
 public:
     CommandParser()
     {
-        CmdDisplay cmdDisplay;
-        CmdEnv cmdEnv;
+        CmdDisplay *cmdDisplay = new CmdDisplay();
+        CmdEnv *cmdEnv = new CmdEnv();
         registerCmd(cmdDisplay);
         registerCmd(cmdEnv);
     }
-    void registerCmd(Commander cmd)
+    void registerCmd(Commander *cmd)
     {
-        cmdMaps[cmd.getCmd()] = cmd;
+        cmdMaps[cmd->getCmd()] = cmd;
     }
     void displayCmds()
     {
@@ -41,7 +41,8 @@ public:
         cout << "Commands: " << endl;
         for (auto iter = cmdMaps.begin(); iter != cmdMaps.end(); ++iter)
         {
-            cout << "  " << iter->first << ", " << iter->second.getDesc() << "  order: "<< iter->second.getExample() << endl;
+            Commander *cmd = iter->second;
+            cout << "  " << iter->first << ", " << cmd->getDesc() << "  order: " << cmd->getExample() << endl;
         }
         cout << "/***********************************************/" << endl;
     }
@@ -59,18 +60,52 @@ public:
             }
             else
             {
-                if (strcmp(doc["command"], "ls") == 0)
+                string cmd = doc["cmd"];
+                // 命令未处理
+                bool cmdProcessFlag = false;
+                if (cmd.compare("null") != 0)
                 {
-                    cout << doc << endl;
+                    for (auto iter = cmdMaps.begin(); iter != cmdMaps.end(); ++iter)
+                    {
+                        if (iter->first.compare(cmd) == 0)
+                        {
+                            // 命令处理了
+                            cmdProcessFlag = true;
+                            iter->second->cmdProcess(doc);
+                        }
+                    }
+                    if (cmdProcessFlag == false)
+                    {
+                        displayCmds();
+                        cout << endl
+                             << "-----<请确认是否有该命令.>--------"
+                             << endl
+                             << endl
+                             << endl;
+                        cout << "--- 原始输入--- => " << doc << endl;
+                    }
                 }
                 else
                 {
-                    cout << doc["command"] << endl;
+                    displayCmds();
+                    cout << endl
+                         << "-----<请确认是否符合命令解析 json 格式.>--------"
+                         << endl
+                         << endl
+                         << endl;
                 }
             }
         }
     }
+    ~CommandParser()
+    {
+        for (auto iter = cmdMaps.begin(); iter != cmdMaps.end(); ++iter)
+        {
+            Commander *cmd = iter->second;
+            delete cmd;
+        }
+    }
 
 private:
-    map<string, Commander> cmdMaps;
+    map<string, Commander *> cmdMaps;
 };

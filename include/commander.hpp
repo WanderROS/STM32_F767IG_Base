@@ -20,7 +20,9 @@ public:
     ~Commander(){
 
     }
-    virtual void cmdProcess(DynamicJsonDocument doc){};
+    virtual void cmdProcess(DynamicJsonDocument doc){
+        cout<<"调用了基类的处理函数"<<endl;
+    };
     virtual void cmdHelp(){};
     string getCmd()
     {

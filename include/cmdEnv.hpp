@@ -4,15 +4,18 @@
 class CmdEnv : public Commander
 {
 public:
-    CmdEnv()  {
+    CmdEnv(Commander &commander) {}
+    CmdEnv()
+    {
         setCmd("env");
         setDesc("display env info.");
         setExample("{\"cmd\":\"env\"}");
     }
-    ~CmdEnv(){
-        
+    ~CmdEnv()
+    {
     }
     void cmdProcess(DynamicJsonDocument doc)
     {
+        cout << "cmd Process" << endl;
     }
 };

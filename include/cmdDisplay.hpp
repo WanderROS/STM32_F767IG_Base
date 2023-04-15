@@ -4,15 +4,18 @@
 class CmdDisplay : public Commander
 {
 public:
-    CmdDisplay()  {
+    CmdDisplay(Commander &commander) {}
+    CmdDisplay()
+    {
         setCmd("display");
         setDesc("display sys info.");
         setExample("{\"cmd\":\"display\"}");
     }
-    ~CmdDisplay(){
-        
+    ~CmdDisplay()
+    {
     }
     void cmdProcess(DynamicJsonDocument doc)
     {
+        cout << "cmd Display." << endl;
     }
 };
