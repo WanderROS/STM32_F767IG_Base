@@ -8,6 +8,7 @@
 #include <map>
 #include "cmdDisplay.hpp"
 #include "cmdEnv.hpp"
+#include "cmdFile.hpp"
 using namespace std;
 extern "C"
 {
@@ -23,8 +24,10 @@ public:
     {
         CmdDisplay *cmdDisplay = new CmdDisplay();
         CmdEnv *cmdEnv = new CmdEnv();
+        CmdFile *cmdFile = new CmdFile();
         registerCmd(cmdDisplay);
         registerCmd(cmdEnv);
+        registerCmd(cmdFile);
     }
     void registerCmd(Commander *cmd)
     {
