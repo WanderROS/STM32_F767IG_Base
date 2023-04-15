@@ -1,5 +1,5 @@
-#ifndef __COMMANDER_H__
-#define __COMMANDER_H__
+#pragma once
+
 #include <iostream>
 using namespace std;
 #include "ArduinoJson.h"
@@ -10,6 +10,7 @@ public:
     {
         cmd = "null";
         desc = "null";
+        example = "null";
     }
     Commander(string _cmd, string _desc)
     {
@@ -29,10 +30,24 @@ public:
     {
         return desc;
     }
-
+    void setCmd(string _cmd)
+    {
+         cmd = _cmd;
+    }
+    void setDesc(string _desc)
+    {
+        desc = _desc;
+    }
+    string getExample()
+    {
+        return example;
+    }
+    void setExample(string _example)
+    {
+         example = _example;
+    }
 private:
     string cmd;
     string desc;
+    string example;
 };
-
-#endif

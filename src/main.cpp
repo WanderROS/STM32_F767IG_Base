@@ -1,9 +1,8 @@
 #include <iostream>
 using namespace std;
 #include "ArduinoJson.h"
-#include "commandParser.h"
+#include "commandParser.hpp"
 #include <unordered_map>
-#include "cmdDisplay.hpp"
 // C 库依赖
 extern "C"
 {
@@ -182,13 +181,11 @@ int main()
     {
         cout << h.first << "->" << h.second << endl;
     }
-    CmdDisplay cmdDisplay;
-    Commander *commander=&cmdDisplay;
-    commander->cmdHelp();
+    CommandParser cmdParser;
     while (1)
     {
         HAL_Delay(10);
-        commandProcess();
+        cmdParser.commandProcess();
     }
     return 0;
 }
