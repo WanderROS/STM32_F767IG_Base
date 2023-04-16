@@ -1,6 +1,8 @@
 {
     "files.associations": {
         "stm32_adafruit_sd.h": "c",
-        "fatfs_flash_qspi.h": "c"
+        "fatfs_flash_qspi.h": "c",
+        "iostream": "cpp",
+        "*.tcc": "cpp"
     }
 }
