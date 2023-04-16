@@ -54,6 +54,9 @@ public:
     }
 
 private:
+    /**
+     * 文件操作帮助命令
+     */
     void displayCmds(DynamicJsonDocument doc)
     {
         cout << "/***********************************************/" << endl;
@@ -64,6 +67,9 @@ private:
         }
         cout << "/***********************************************/" << endl;
     }
+    /**
+     * 列出文件
+     */
     void listFiles(DynamicJsonDocument doc)
     {
         DIR dir;
@@ -75,7 +81,9 @@ private:
             res_flash = f_opendir(&dir, "");
             if (res_flash == FR_OK)
             {
-                printf("打开根目录成功！\n");
+                cout << ">> 打开根目录成功!"
+                     << endl
+                     << endl;
             }
             for (int i = 0;; i++)
             {
@@ -90,19 +98,19 @@ private:
                 }
                 if (fno.fattrib & AM_DIR) // 判断是文件还是子目录
                 {
-                    printf("(0x%02d)目录", fno.fattrib);
+                    printf("  (0x%02d) d, ", fno.fattrib);
                 }
                 else
                 {
-                    printf("(0x%02d)文件", fno.fattrib);
+                    printf("  (0x%02d) f, ", fno.fattrib);
                 }
-                printf("名称为：%s\r\n", (char *)fno.fname);
+                printf("%s\r\n", (char *)fno.fname);
             }
             /*
              *
              * 不再使用文件系统，取消挂载文件系统
              */
-            f_mount(NULL, "0:", 1);
+            f_mount(NULL, QSPIPath, 1);
         }
         else
         {
@@ -126,27 +134,60 @@ private:
             }
             else
             {
+                // 打开文件，读取的方式，文件不存在打开会失败
                 res_flash = f_open(&fnew, filename.c_str(), FA_OPEN_EXISTING | FA_READ);
-
                 if (res_flash == FR_OK)
                 {
-                    BYTE *ReadBuffer = (BYTE *)malloc(1024);
-                    printf("》打开文件成功。\r\n");
-                    res_flash = f_read(&fnew, ReadBuffer, 1024, &fnum);
+                    long length = doc["size"];
+                    if (length <= 0 || length >= 65535)
+                    {
+                        length = 1024;
+                    }
+                    BYTE *ReadBuffer = (BYTE *)malloc(length);
+                    cout << ">> 打开文件 "
+                         << filename
+                         << " 成功."
+                         << "即将读取文件长度: "
+                         << length
+                         << " ."
+                         << endl;
+                    res_flash = f_read(&fnew, ReadBuffer, length, &fnum);
                     if (res_flash == FR_OK)
                     {
-                        printf("》文件读取成功,读到字节数据：%d\r\n", fnum);
-                        printf("》读取得的文件数据为：\r\n%s \r\n", ReadBuffer);
+                        cout << ">>文件 "
+                             << filename
+                             << " 读取成功,读取到 "
+                             << fnum
+                             << " 字节数据."
+                             << endl;
+                        cout << ">> 文件内容: "
+                             << endl
+                             << endl;
+                        for (uint16_t i = 0; i < fnum; i++)
+                        {
+                            cout << ReadBuffer[i];
+                        }
+                        cout << endl;
                     }
                     else
                     {
-                        printf("！！文件读取失败：(%d)\n", res_flash);
+                        cout << ">>文件 "
+                             << filename
+                             << " 读取失败.返回: "
+                             << res_flash
+                             << " ."
+                             << endl;
                     }
                     free(ReadBuffer);
+                    ReadBuffer = NULL;
                 }
                 else
                 {
-                    printf("！！打开文件失败。\r\n");
+                    cout << ">> 打开文件失败,请检查文件 "
+                         << filename
+                         << " 是否存在."
+                         << endl
+                         << endl;
                 }
                 /* 不再读写，关闭文件 */
                 f_close(&fnew);
@@ -172,7 +213,10 @@ private:
             string content = doc["content"];
             if (filename.compare("null") == 0)
             {
-                cout << ">> 请检查文件名是否正确" << endl;
+                cout << ">> 请检查文件名是否正确, 输入内容:"
+                     << endl
+                     << doc
+                     << endl;
                 return;
             }
             else
@@ -180,16 +224,28 @@ private:
                 res_flash = f_open(&fnew, filename.c_str(), FA_CREATE_ALWAYS | FA_WRITE);
                 if (res_flash == FR_OK)
                 {
-                    printf("》打开/创建FatFs读写测试文件.txt文件成功，向文件写入数据。\r\n");
+                    cout << ">> 打开/创建文件:  "
+                         << filename
+                         << " 成功."
+                         << "即将写入内容:"
+                         << endl
+                         << content
+                         << endl;
                     /* 将指定存储区内容写入到文件内 */
                     res_flash = f_write(&fnew, content.c_str(), content.size(), &fnum);
                     if (res_flash == FR_OK)
                     {
-                        printf("》文件写入成功，写入字节数据：%d\n", fnum);
+                        cout << ">> 内容写入成功，写入字节数: "
+                             << fnum
+                             << " ."
+                             << endl;
                     }
                     else
                     {
-                        printf("！！文件写入失败：(%d)\n", res_flash);
+                        cout << ">> 内容写入失败，返回: "
+                             << res_flash
+                             << " ."
+                             << endl;
                     }
                     /* 不再读写，关闭文件 */
                     f_close(&fnew);
@@ -200,7 +256,7 @@ private:
         }
         else
         {
-            cout << ">> 当前 Flash 文件系统挂载失败,写入文件失败" << endl;
+            cout << ">> 当前 Flash 文件系统挂载失败,写入文件失败." << endl;
             return;
         }
     }
