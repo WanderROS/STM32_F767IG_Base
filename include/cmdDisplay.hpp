@@ -1,6 +1,9 @@
 #pragma once
 #include "commander.hpp"
 
+extern "C"{
+    extern uint32_t SystemCoreClock;
+}
 class CmdDisplay : public Commander
 {
 public:
@@ -16,6 +19,6 @@ public:
     }
     void cmdProcess(DynamicJsonDocument doc)
     {
-        cout << "cmd Display." << endl;
+        cout<< "CPU Freq: " <<  SystemCoreClock/1000000<<" MHz."<<endl;
     }
 };
