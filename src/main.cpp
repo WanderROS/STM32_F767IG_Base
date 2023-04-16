@@ -2,6 +2,7 @@
 using namespace std;
 #include "ArduinoJson.h"
 #include "commandParser.hpp"
+#include "systemConfig.hpp"
 // C 库依赖
 extern "C"
 {
@@ -25,10 +26,9 @@ extern "C"
     extern FATFS flash_fs;
     extern Diskio_drvTypeDef QSPI_Driver;
 }
-#define FLASH_WriteAddress 0x00000
-#define FLASH_ReadAddress FLASH_WriteAddress
-#define FLASH_SectorToErase FLASH_WriteAddress
-uint8_t Rx_Buffer[100];
+
+/* 系统配置类 */
+SystemConfig systemConfig;
 
 int main()
 {
@@ -47,6 +47,8 @@ int main()
     /*初始化SDRAM模块*/
     SDRAM_Init();
     SDRAM_Test();
+    systemConfig.readFile2Config();
+    systemConfig.showSystemConfig();
     CommandParser cmdParser;
     while (1)
     {
