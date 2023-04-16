@@ -12,6 +12,7 @@
 using namespace std;
 extern "C"
 {
+    #include <stdlib.h>
     extern uint8_t ucDebugRecvBuffer[];
     extern uint16_t ulDebugRecvSize;
     extern uint8_t ucDebugRecvReady;
@@ -35,6 +36,7 @@ public:
     }
     void displayCmds()
     {
+        cout<<endl;
         cout << "/***********************************************/" << endl;
         cout << "*                                              *" << endl;
         cout << "*             JSON 命令行工具 1.0              *" << endl;

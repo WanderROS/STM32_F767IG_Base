@@ -14,11 +14,11 @@ extern "C"
      *                              定义变量
      ******************************************************************************
      */
-    char QSPIPath[4];            /* QSPI flash逻辑驱动器路径 */
-    FATFS fs;                    /* FatFs文件系统对象 */
-    FIL fnew;                    /* 文件对象 */
-    FRESULT res_flash;           /* 文件操作结果 */
-    UINT fnum;                   /* 文件成功读写数量 */
+    char QSPIPath[4];  /* QSPI flash逻辑驱动器路径 */
+    FATFS fs;          /* FatFs文件系统对象 */
+    FIL fnew;          /* 文件对象 */
+    FRESULT res_flash; /* 文件操作结果 */
+    UINT fnum;         /* 文件成功读写数量 */
     extern FATFS flash_fs;
     extern Diskio_drvTypeDef QSPI_Driver;
 }
@@ -34,7 +34,7 @@ public:
     {
         setCmd("file");
         setDesc("file operation");
-        setExample("{\"cmd\":\"file\",\"op\":\"mkfs\"}");
+        setExample("{\"cmd\":\"file\",\"op\":\"help\"}");
         init();
     }
     ~CmdFile()
@@ -43,10 +43,27 @@ public:
     void cmdProcess(DynamicJsonDocument doc)
     {
         string op = doc["op"];
-        RunFunc(op, doc);
+        if (op.compare("null") == 0 || funcMap.count(op) == 0)
+        {
+            displayCmds(doc);
+        }
+        else
+        {
+            RunFunc(op, doc);
+        }
     }
 
 private:
+    void displayCmds(DynamicJsonDocument doc)
+    {
+        cout << "/***********************************************/" << endl;
+        cout << "FileOps: " << endl;
+        for (auto iter = funcDescMap.begin(); iter != funcDescMap.end(); ++iter)
+        {
+            cout << "  " << iter->first << ", " << iter->second << endl;
+        }
+        cout << "/***********************************************/" << endl;
+    }
     void listFiles(DynamicJsonDocument doc)
     {
         DIR dir;
@@ -110,7 +127,7 @@ private:
             else
             {
                 res_flash = f_open(&fnew, filename.c_str(), FA_OPEN_EXISTING | FA_READ);
-                
+
                 if (res_flash == FR_OK)
                 {
                     BYTE *ReadBuffer = (BYTE *)malloc(1024);
@@ -125,7 +142,7 @@ private:
                     {
                         printf("！！文件读取失败：(%d)\n", res_flash);
                     }
-                     free(ReadBuffer);
+                    free(ReadBuffer);
                 }
                 else
                 {
@@ -245,6 +262,12 @@ private:
         funcMap.insert(make_pair("write", &CmdFile::writeFile));
         funcMap.insert(make_pair("read", &CmdFile::readFile));
         funcMap.insert(make_pair("list", &CmdFile::listFiles));
+        funcMap.insert(make_pair("help", &CmdFile::displayCmds));
+        funcDescMap.insert(make_pair("mkfs", "格式化文件系统,example: {\"cmd\":\"file\",\"op\":\"mkfs\"}"));
+        funcDescMap.insert(make_pair("write", "写入文件,example: {\"cmd\":\"file\",\"op\":\"write\",\"filename\":\"test.txt\",\"content\":\"hello world\"}"));
+        funcDescMap.insert(make_pair("read", "读取文件,example: {\"cmd\":\"file\",\"op\":\"read\",\"filename\":\"test.txt\",\"size\":1024}"));
+        funcDescMap.insert(make_pair("list", "文件列表,example: {\"cmd\":\"file\",\"op\":\"list\"}"));
+        funcDescMap.insert(make_pair("help", "帮助,example: {\"cmd\":\"file\",\"op\":\"help\"}"));
     }
     // 传入函数名，执行对应的函数
     void RunFunc(string funcName, DynamicJsonDocument doc)
@@ -255,4 +278,5 @@ private:
         }
     }
     map<string, Fun_ptr> funcMap;
+    map<string, string> funcDescMap;
 };
