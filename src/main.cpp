@@ -12,6 +12,7 @@ extern "C"
 #include <stdio.h>
 #include "bsp/bsp_debug_usart.h"
 #include "bsp/bsp_device_usart.h"
+#include "bsp/bsp_wifi_usart.h"
 #include "bsp/bsp_led.h"
 #include "bsp/bsp_sdram.h"
 #include "../lib/FATFS/ff.h"
@@ -26,6 +27,14 @@ extern "C"
     extern char QSPIPath[4]; /* QSPI flash逻辑驱动器路径 */
     extern FATFS flash_fs;
     extern Diskio_drvTypeDef QSPI_Driver;
+
+    extern uint8_t ucDeviceRecvBuffer[];
+    extern uint16_t ulDeviceRecvSize;
+    extern uint8_t ucDeviceRecvReady;
+
+    extern uint8_t ucWifiRecvBuffer[];
+    extern uint16_t ulWifiRecvSize;
+    extern uint8_t ucWifiRecvReady;
 }
 
 /* 系统配置类 */
@@ -39,6 +48,7 @@ int main()
     /* 初始化串口 */
     DEBUG_USART_Config();
     Device_USART_Config();
+    UartWiFi_USART_Config();
     /* 初始化 LED */
     LED_GPIO_Config();
     cout << "STM32 F767IGT6 调试串口初始化成功！" << endl;
@@ -55,7 +65,25 @@ int main()
     while (1)
     {
         HAL_Delay(10);
-        //   Usart2_SendString("hello");
+        if (ucDeviceRecvReady == TRUE)
+        {
+            for (int i = 0; i < ulDeviceRecvSize; ++i)
+            {
+                printf("%02x ", ucDeviceRecvBuffer[i]);
+            }
+            printf("\n");
+            ucDeviceRecvReady = FALSE;
+        }
+        if (ucWifiRecvReady == TRUE)
+        {
+            for (int i = 0; i < ulWifiRecvSize; ++i)
+            {
+                printf("%02x ", ucWifiRecvBuffer[i]);
+            }
+            printf("\n");
+            ucWifiRecvReady = FALSE;
+        }
+        // UsartWiFi_SendString("hello");
         cmdParser.commandProcess();
     }
     return 0;

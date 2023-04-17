@@ -2,7 +2,7 @@
 
 UART_HandleTypeDef UartDeviceHandle;
 /**
- * @brief  DEVICE_USART GPIO 配置,工作模式配置。115200 8-N-1
+ * @brief  DEVICE_USART GPIO 配置,工作模式配置。9600 8-N-1
  * @param  无
  * @retval 无
  */
@@ -16,8 +16,8 @@ void Device_USART_Config(void)
     DEVICE_USART_TX_GPIO_CLK_ENABLE();
 
     /* 配置串口6时钟源*/
-    RCC_PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART1;
-    RCC_PeriphClkInit.Usart6ClockSelection = RCC_USART6CLKSOURCE_SYSCLK;
+    RCC_PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART6;
+    RCC_PeriphClkInit.Usart6ClockSelection = RCC_USART6CLKSOURCE_PCLK2;
     HAL_RCCEx_PeriphCLKConfig(&RCC_PeriphClkInit);
     /* 使能 UART 时钟 */
     DEVICE_USART_CLK_ENABLE();
@@ -49,7 +49,7 @@ void Device_USART_Config(void)
     HAL_UART_Init(&UartDeviceHandle);
 
     /*串口中断初始化 */
-    HAL_NVIC_SetPriority(DEVICE_USART_IRQ, 0, 0);
+    HAL_NVIC_SetPriority(DEVICE_USART_IRQ, 1, 1);
     HAL_NVIC_EnableIRQ(DEVICE_USART_IRQ);
     /*配置串口接收中断 */
     __HAL_UART_ENABLE_IT(&UartDeviceHandle, UART_IT_RXNE);

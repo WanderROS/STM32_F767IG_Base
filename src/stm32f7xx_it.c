@@ -42,6 +42,7 @@
 #include "main.h"
 #include "bsp/bsp_debug_usart.h"
 #include "bsp/bsp_device_usart.h"
+#include "bsp/bsp_wifi_usart.h"
 #include <stdlib.h>
 /** @addtogroup STM32F7xx_HAL_Examples
  * @{
@@ -226,7 +227,8 @@ enum Recv_Status
   START = 0,
   RECVING,
   END
-} device_status;
+} device_status,
+    wifi_status;
 
 uint8_t ucTemp;
 // 串口设备接收缓冲区
@@ -259,7 +261,6 @@ void DEVICE_USART_IRQHandler(void)
         {
           for (int i = 0; i < device_recv_length; ++i)
           {
-            // printf("%02x ", device_recv_buffer[i]);
             ucDeviceRecvBuffer[i] = device_recv_buffer[i];
           }
           ulDeviceRecvSize = device_recv_length;
@@ -288,6 +289,67 @@ void DEVICE_USART_IRQHandler(void)
     }
   }
   HAL_UART_IRQHandler(&UartDeviceHandle);
+}
+
+uint8_t ucWiFiTemp;
+// 串口wifi接收缓冲区
+char *wifi_recv_buffer;
+// WIFI帧接收长度
+unsigned char wifi_recv_length;
+unsigned char wifi_recv_cur_index;
+// 接收字符串最大缓冲区
+#define WIFI_RECV_BUFFER_SIZE 256
+uint8_t ucWifiRecvBuffer[WIFI_RECV_BUFFER_SIZE];
+uint16_t ulWifiRecvSize;
+uint8_t ucWifiRecvReady = FALSE;
+void UartWiFi_USART_IRQHandler(void)
+{
+  if (__HAL_UART_GET_IT(&UartWiFiHandle, UART_IT_RXNE) != RESET)
+  {
+    HAL_UART_Receive(&UartWiFiHandle, (uint8_t *)&ucWiFiTemp, 1, 1000);
+    if (wifi_status == RECVING)
+    {
+      wifi_recv_cur_index++;
+      wifi_recv_buffer[wifi_recv_cur_index] = ucWiFiTemp;
+      if (wifi_recv_cur_index == wifi_recv_length - 1)
+      {
+        wifi_status = END;
+      }
+      if (wifi_status == END)
+      {
+        unsigned char checkSum = orderCheckSum(wifi_recv_buffer, wifi_recv_length);
+        if (checkSum == wifi_recv_buffer[wifi_recv_length - 1])
+        {
+          for (int i = 0; i < wifi_recv_length; ++i)
+          {
+            ucWifiRecvBuffer[i] = wifi_recv_buffer[i];
+          }
+          ulWifiRecvSize = wifi_recv_length;
+          ucWifiRecvReady = TRUE;
+        }
+        free(wifi_recv_buffer);
+        wifi_recv_buffer = NULL;
+        wifi_recv_cur_index = 0;
+        wifi_recv_length = 0;
+      }
+    }
+    // 收到了0xAA,并且接收数组为空，说明是帧长度字节
+    if (wifi_status == START)
+    {
+      wifi_recv_buffer = (char *)malloc(ucWiFiTemp + 1);
+      wifi_status = RECVING;
+      wifi_recv_length = ucWiFiTemp + 1;
+      wifi_recv_buffer[0] = 0xAA;
+      wifi_recv_buffer[1] = ucWiFiTemp;
+      wifi_recv_cur_index = 1;
+    }
+    // 收到了 MSmart 帧头;
+    if (0xAA == ucWiFiTemp)
+    {
+      wifi_status = START;
+    }
+  }
+  HAL_UART_IRQHandler(&UartWiFiHandle);
 }
 /**
  * @brief  This function handles PPP interrupt request.
