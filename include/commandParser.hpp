@@ -9,10 +9,15 @@
 #include "cmdDisplay.hpp"
 #include "cmdEnv.hpp"
 #include "cmdFile.hpp"
+#include "systemConfig.hpp"
 using namespace std;
+
+/* 系统配置类 */
+extern SystemConfig systemConfig;
+
 extern "C"
 {
-    #include <stdlib.h>
+#include <stdlib.h>
     extern uint8_t ucDebugRecvBuffer[];
     extern uint16_t ulDebugRecvSize;
     extern uint8_t ucDebugRecvReady;
@@ -36,7 +41,7 @@ public:
     }
     void displayCmds()
     {
-        cout<<endl;
+        cout << endl;
         cout << "/***********************************************/" << endl;
         cout << "*                                              *" << endl;
         cout << "*             JSON 命令行工具 1.0              *" << endl;
@@ -56,6 +61,10 @@ public:
         if (ucDebugRecvReady == TRUE)
         {
             ucDebugRecvReady = FALSE;
+            if (systemConfig.getBoolDebugEcho())
+            {
+                cout << ">> " << ucDebugRecvBuffer << endl;
+            }
             DynamicJsonDocument doc(1024);
             // Deserialize the JSON document
             DeserializationError error = deserializeJson(doc, ucDebugRecvBuffer);

@@ -2,6 +2,26 @@
 #include <iostream>
 using namespace std;
 #include "ArduinoJson.h"
+// C 库依赖
+extern "C"
+{
+#include "../lib/FATFS/ff.h"
+#include "../lib/FATFS/drivers/fatfs_flash_qspi.h"
+#include "../lib/FATFS/ff_gen_drv.h"
+
+    /**
+     ******************************************************************************
+     *                              定义变量
+     ******************************************************************************
+     */
+    extern char QSPIPath[4];  /* QSPI flash逻辑驱动器路径 */
+    extern FATFS fs;          /* FatFs文件系统对象 */
+    extern FIL fnew;          /* 文件对象 */
+    extern FRESULT res_flash; /* 文件操作结果 */
+    extern UINT fnum;         /* 文件成功读写数量 */
+    extern FATFS flash_fs;
+}
+
 /**
  * 系统配置类
  */
@@ -13,8 +33,15 @@ public:
     }
     void showSystemConfig()
     {
-        DynamicJsonDocument doc = serialOut();
-        cout << doc << endl;
+        cout << "/***********************************************/" << endl;
+        cout << "                   系统环境变量                   " << endl;
+        cout << "/***********************************************/" << endl;
+        cout << ">> 调试串口回显  boolDebugEcho:     " << boolDebugEcho << endl;
+        cout << ">> WiFi 输入显示 boolWiFiInEcho:    " << boolWiFiInEcho << endl;
+        cout << ">> WiFi 输出显示 boolWiFiOutEcho:   " << boolWiFiOutEcho << endl;
+        cout << ">> 设备 输入显示 boolDeviceInEcho:  " << boolDeviceInEcho << endl;
+        cout << ">> 设备 输出显示 boolDeviceOutEcho: " << boolDeviceOutEcho << endl;
+        cout << endl;
     }
     void saveSystemConfig2File()
     {
@@ -187,12 +214,17 @@ public:
         {
             boolDeviceOutEcho = doc["boolDeviceOutEcho"];
         }
-        cout<< ">> 反序列化成功."<<endl;
+        cout << ">> 反序列化成功." << endl;
+    }
+
+    bool getBoolDebugEcho()
+    {
+        return boolDebugEcho;
     }
 
 private:
     /* 调试串口输入回显开关 */
-    bool boolDebugEcho = false;
+    bool boolDebugEcho = true;
     /* Wi-Fi 输入显示开关 */
     bool boolWiFiInEcho = false;
     /* Wi-Fi 输出显示开关 */

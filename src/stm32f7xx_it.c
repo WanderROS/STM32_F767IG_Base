@@ -192,6 +192,7 @@ void DEBUG_USART_IRQHandler(void)
       {
         // 当前串口接收字符串内容长度
         ulDebugRecvSize = ulDebugRecvCount;
+        ucDebugRecvBuffer[ulDebugRecvSize + 1] = '\0';
         ulDebugRecvCount = 0;
         ucDebugRecvReady = TRUE;
       }
