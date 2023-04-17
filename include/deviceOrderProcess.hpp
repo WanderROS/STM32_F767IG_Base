@@ -1,5 +1,6 @@
 #pragma once
 #include "systemConfig.hpp"
+#include <string>
 /**
  * 设备指令处理
  */
@@ -57,13 +58,13 @@ public:
         cout << endl;
     }
 
-    void setProjectNo(uint16_t a0)
+    void setSN(string _sn)
     {
-        projectNo = a0;
+        sn = _sn;
     }
-    uint16_t getProjectNo()
+    string getSN()
     {
-        return projectNo;
+        return sn;
     }
     void setBoolCheatA0(bool val)
     {
@@ -73,6 +74,23 @@ public:
     bool getBoolCheatA0()
     {
         return boolCheatA0;
+    }
+    void setBoolCheatSN(bool val)
+    {
+        boolCheatSN = val;
+    }
+
+    bool getBoolCheatSN()
+    {
+        return boolCheatSN;
+    }
+    void setProjectNo(uint16_t a0)
+    {
+        projectNo = a0;
+    }
+    uint16_t getProjectNo()
+    {
+        return projectNo;
     }
     void saveSystemConfig2File()
     {
@@ -220,7 +238,7 @@ private:
             buffer[12] = projectNo & 0xFF;
             buffer[13] = projectNo / 255;
         }
-        buffer[len-1] = orderCheckSum(buffer, len);
+        buffer[len - 1] = orderCheckSum(buffer, len);
     }
     void process04(uint8_t *buffer, int len)
     {
@@ -230,7 +248,7 @@ private:
             buffer[32] = projectNo / 255;
         }
 
-        buffer[len-1] = orderCheckSum(buffer, len);
+        buffer[len - 1] = orderCheckSum(buffer, len);
     }
     void process03(uint8_t *buffer, int len)
     {
@@ -239,11 +257,11 @@ private:
             buffer[31] = projectNo & 0xFF;
             buffer[32] = projectNo / 255;
         }
-        buffer[len-1] = orderCheckSum(buffer, len);
+        buffer[len - 1] = orderCheckSum(buffer, len);
     }
     void processSN(uint8_t *buffer, int len)
     {
-       
+
         if (boolCheatSN)
         {
             len = 43;
@@ -303,6 +321,7 @@ private:
         DynamicJsonDocument doc(1024);
         doc["projectNo"] = projectNo;
         doc["boolCheatA0"] = boolCheatA0;
+        doc["boolCheatSN"] = boolCheatSN;
         return doc;
     }
     /* 反序列化 */
@@ -315,6 +334,15 @@ private:
         if (!doc["boolCheatA0"].isNull())
         {
             boolCheatA0 = doc["boolCheatA0"];
+        }
+        if (!doc["boolCheatSN"].isNull())
+        {
+            boolCheatSN = doc["boolCheatSN"];
+        }
+        if (!doc["sn"].isNull())
+        {
+            const char * _sn = doc["sn"];
+            sn = _sn;
         }
         cout << ">> 反序列化成功." << endl;
     }

@@ -71,6 +71,19 @@ private:
                 deviceOrder.setProjectNo(doc["projectNo"]);
             }
         }
+        if (!doc["boolCheatSN"].isNull())
+        {
+            if (doc["boolCheatSN"] == true)
+            {
+                deviceOrder.setBoolCheatSN(true);
+            }
+        }
+        if (!doc["sn"].isNull())
+        {
+            const char *_sn = doc["sn"];
+            string sn = _sn;
+            deviceOrder.setSN(sn);
+        }
         cout << ">> Device 设置完成." << endl;
         deviceOrder.showDeviceConfig();
     }
@@ -84,7 +97,7 @@ private:
         funcMap.insert(make_pair("set", &CmdDevice::setDeviceValues));
         funcMap.insert(make_pair("help", &CmdDevice::displayCmds));
         funcDescMap.insert(make_pair("save", "保存设备变量,example: {\"cmd\":\"device\",\"op\":\"save\"}"));
-        funcDescMap.insert(make_pair("set", "设置设备变量,example: {\"cmd\":\"device\",\"op\":\"set\",\"boolCheatA0\":true,\"projectNo\":13104}"));
+        funcDescMap.insert(make_pair("set", "设置设备变量,example: {\"cmd\":\"device\",\"op\":\"set\",\"boolCheatA0\":true,\"projectNo\":13104,\"sn\":\"0000DB99138104887734179988880003\",\"boolCheatSN\":true}"));
         funcDescMap.insert(make_pair("help", "帮助,example: {\"cmd\":\"device\",\"op\":\"help\"}"));
     }
     // 传入函数名，执行对应的函数
