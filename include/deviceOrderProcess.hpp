@@ -213,8 +213,7 @@ public:
     }
 
 private:
-    void
-    processA0(uint8_t *buffer, int len)
+    void processA0(uint8_t *buffer, int len)
     {
         if (boolCheatA0)
         {
@@ -242,6 +241,19 @@ private:
         }
         buffer[len] = orderCheckSum(buffer, len);
     }
+    void processSN(uint8_t *buffer, int len)
+    {
+        if (boolCheatSN)
+        {
+            int temp = 43;
+            for (int snTemp = 10; snTemp < temp - 1; snTemp++)
+            {
+                buffer[snTemp] = sn.at(snTemp - 10);
+            }
+        }
+        len = 43;
+        buffer[len - 1] = orderCheckSum(buffer, len);
+    }
     // 注入内容
     void injectOrder(uint8_t *buffer, int len)
     {
@@ -260,6 +272,9 @@ private:
             case 0x03:
                 process03(buffer, len);
                 break;
+            case 0x07:
+                processSN(buffer, len);
+                break;
             default:
                 break;
             }
@@ -270,10 +285,13 @@ private:
      */
     unsigned char orderCheckSum(uint8_t *buffer, int len)
     {
+        unsigned char *p = buffer;
         unsigned char checksum = 0;
+        p++;
         for (int i = 0; i < len - 2; i++)
         {
-            checksum += buffer[1 + i];
+            checksum += *p;
+            p++;
         }
         checksum = ~checksum + 1;
         return checksum;
@@ -304,6 +322,9 @@ private:
     uint16_t projectNo = 13105;
     // 欺骗项目号,项目号四个品类都是一样的处理逻辑
     bool boolCheatA0 = false;
+    // 欺骗 SN
+    bool boolCheatSN = true;
+    string sn = "0000DB99138104887734179988880003";
     /* 配置保存文件名 */
     string defaultConfigFile = "device.txt";
 };
