@@ -24,7 +24,7 @@ public:
     {
         if (ucDeviceRecvReady == TRUE)
         {
-            injectOrder(ucDeviceRecvBuffer, ulDeviceRecvSize - 1);
+            injectOrder(ucDeviceRecvBuffer, ulDeviceRecvSize);
             if (systemConfig.getBoolDeviceOutEcho())
             {
                 printf(">> 设备输出: ");
@@ -220,7 +220,7 @@ private:
             buffer[12] = projectNo & 0xFF;
             buffer[13] = projectNo / 255;
         }
-        buffer[len] = orderCheckSum(buffer, len);
+        buffer[len-1] = orderCheckSum(buffer, len);
     }
     void process04(uint8_t *buffer, int len)
     {
@@ -230,7 +230,7 @@ private:
             buffer[32] = projectNo / 255;
         }
 
-        buffer[len] = orderCheckSum(buffer, len);
+        buffer[len-1] = orderCheckSum(buffer, len);
     }
     void process03(uint8_t *buffer, int len)
     {
@@ -239,19 +239,19 @@ private:
             buffer[31] = projectNo & 0xFF;
             buffer[32] = projectNo / 255;
         }
-        buffer[len] = orderCheckSum(buffer, len);
+        buffer[len-1] = orderCheckSum(buffer, len);
     }
     void processSN(uint8_t *buffer, int len)
     {
+       
         if (boolCheatSN)
         {
-            int temp = 43;
-            for (int snTemp = 10; snTemp < temp - 1; snTemp++)
+            len = 43;
+            for (int i = 10; i < len - 1; i++)
             {
-                buffer[snTemp] = sn.at(snTemp - 10);
+                buffer[i] = sn.at(i - 10);
             }
         }
-        len = 43;
         buffer[len - 1] = orderCheckSum(buffer, len);
     }
     // 注入内容
