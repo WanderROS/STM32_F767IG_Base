@@ -1,7 +1,10 @@
 #pragma once
+#include "systemConfig.hpp"
 /**
  * WiFi 模组指令处理
  */
+/* 系统配置类 */
+extern SystemConfig systemConfig;
 extern "C"
 {
 #include "main.h"
@@ -20,13 +23,22 @@ public:
     {
         if (ucWifiRecvReady == TRUE)
         {
-            printf("串口指令: ");
+            if (systemConfig.getBoolWiFiOutEcho())
+            {
+                printf(">> WiFi 输出: ");
+            }
             for (int i = 0; i < ulWifiRecvSize; ++i)
             {
-                printf("%02x ", ucWifiRecvBuffer[i]);
+                if (systemConfig.getBoolWiFiOutEcho())
+                {
+                    printf("%02x ", ucWifiRecvBuffer[i]);
+                }
                 HAL_UART_Transmit(&UartDeviceHandle, (uint8_t *)(ucWifiRecvBuffer + i), 1, 1000);
             }
-            printf("\n");
+            if (systemConfig.getBoolWiFiOutEcho())
+            {
+                printf("\n");
+            }
             ucWifiRecvReady = FALSE;
         }
     }

@@ -221,6 +221,27 @@ public:
     {
         return boolDebugEcho;
     }
+    bool getBoolDeviceOutEcho()
+    {
+        return boolDeviceOutEcho;
+    }
+    bool getBoolWiFiOutEcho()
+    {
+        return boolWiFiOutEcho;
+    }
+
+    void setBoolDebugEcho(bool val)
+    {
+        boolDebugEcho = val;
+    }
+    void setBoolDeviceOutEcho(bool val)
+    {
+        boolDeviceOutEcho = val;
+    }
+    void setBoolWiFiOutEcho(bool val)
+    {
+        boolWiFiOutEcho = val;
+    }
 
 private:
     /* 调试串口输入回显开关 */
