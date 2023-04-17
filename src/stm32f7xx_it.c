@@ -41,6 +41,8 @@
 #include "stm32f7xx_it.h"
 #include "main.h"
 #include "bsp/bsp_debug_usart.h"
+#include "bsp/bsp_device_usart.h"
+#include <stdlib.h>
 /** @addtogroup STM32F7xx_HAL_Examples
  * @{
  */
@@ -206,6 +208,87 @@ void DEBUG_USART_IRQHandler(void)
   HAL_UART_IRQHandler(&UartHandle);
 }
 
+/**
+ * CRC 校验
+ */
+unsigned char orderCheckSum(char *buffer, int len)
+{
+  unsigned char checksum = 0;
+  for (int i = 0; i < len - 2; i++)
+  {
+    checksum += buffer[1 + i];
+  }
+  checksum = ~checksum + 1;
+  return checksum;
+}
+enum Recv_Status
+{
+  START = 0,
+  RECVING,
+  END
+} device_status;
+
+uint8_t ucTemp;
+// 串口设备接收缓冲区
+char *device_recv_buffer;
+// 设备帧接收长度
+unsigned char device_recv_length;
+unsigned char device_recv_cur_index;
+// 接收字符串最大缓冲区
+#define DEVICE_RECV_BUFFER_SIZE 256
+uint8_t ucDeviceRecvBuffer[DEVICE_RECV_BUFFER_SIZE];
+uint16_t ulDeviceRecvSize;
+uint8_t ucDeviceRecvReady = FALSE;
+void DEVICE_USART_IRQHandler(void)
+{
+  if (__HAL_UART_GET_IT(&UartDeviceHandle, UART_IT_RXNE) != RESET)
+  {
+    HAL_UART_Receive(&UartDeviceHandle, (uint8_t *)&ucTemp, 1, 1000);
+    if (device_status == RECVING)
+    {
+      device_recv_cur_index++;
+      device_recv_buffer[device_recv_cur_index] = ucTemp;
+      if (device_recv_cur_index == device_recv_length - 1)
+      {
+        device_status = END;
+      }
+      if (device_status == END)
+      {
+        unsigned char checkSum = orderCheckSum(device_recv_buffer, device_recv_length);
+        if (checkSum == device_recv_buffer[device_recv_length - 1])
+        {
+          for (int i = 0; i < device_recv_length; ++i)
+          {
+            // printf("%02x ", device_recv_buffer[i]);
+            ucDeviceRecvBuffer[i] = device_recv_buffer[i];
+          }
+          ulDeviceRecvSize = device_recv_length;
+          ucDeviceRecvReady = TRUE;
+        }
+        free(device_recv_buffer);
+        device_recv_buffer = NULL;
+        device_recv_cur_index = 0;
+        device_recv_length = 0;
+      }
+    }
+    // 收到了0xAA,并且接收数组为空，说明是帧长度字节
+    if (device_status == START)
+    {
+      device_recv_buffer = (char *)malloc(ucTemp + 1);
+      device_status = RECVING;
+      device_recv_length = ucTemp + 1;
+      device_recv_buffer[0] = 0xAA;
+      device_recv_buffer[1] = ucTemp;
+      device_recv_cur_index = 1;
+    }
+    // 收到了 MSmart 帧头;
+    if (0xAA == ucTemp)
+    {
+      device_status = START;
+    }
+  }
+  HAL_UART_IRQHandler(&UartDeviceHandle);
+}
 /**
  * @brief  This function handles PPP interrupt request.
  * @param  None
