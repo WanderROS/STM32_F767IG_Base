@@ -10,6 +10,7 @@
 #include "cmdEnv.hpp"
 #include "cmdFile.hpp"
 #include "systemConfig.hpp"
+#include "cmdDevice.hpp"
 using namespace std;
 
 /* 系统配置类 */
@@ -31,9 +32,11 @@ public:
         CmdDisplay *cmdDisplay = new CmdDisplay();
         CmdEnv *cmdEnv = new CmdEnv();
         CmdFile *cmdFile = new CmdFile();
+        CmdDevice *cmdDevice = new CmdDevice();
         registerCmd(cmdDisplay);
         registerCmd(cmdEnv);
         registerCmd(cmdFile);
+        registerCmd(cmdDevice);
     }
     void registerCmd(Commander *cmd)
     {

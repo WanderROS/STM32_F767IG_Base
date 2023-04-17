@@ -41,7 +41,8 @@ extern "C"
 
 /* 系统配置类 */
 SystemConfig systemConfig;
-
+DeviceOrder deviceOrder;
+WiFiOrder wifiOrder;
 int main()
 {
 
@@ -63,9 +64,10 @@ int main()
     SDRAM_Test();
     systemConfig.readFile2Config();
     systemConfig.showSystemConfig();
+    deviceOrder.readFile2Config();
+    deviceOrder.showDeviceConfig();
     CommandParser cmdParser;
-    DeviceOrder deviceOrder;
-    WiFiOrder wifiOrder;
+
     while (1)
     {
         HAL_Delay(10);
