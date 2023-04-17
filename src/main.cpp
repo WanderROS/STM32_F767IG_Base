@@ -67,18 +67,22 @@ int main()
         HAL_Delay(10);
         if (ucDeviceRecvReady == TRUE)
         {
+            printf("设备指令: ");
             for (int i = 0; i < ulDeviceRecvSize; ++i)
             {
                 printf("%02x ", ucDeviceRecvBuffer[i]);
+                HAL_UART_Transmit(&UartWiFiHandle, (uint8_t *)(ucDeviceRecvBuffer + i), 1, 1000);
             }
             printf("\n");
             ucDeviceRecvReady = FALSE;
         }
         if (ucWifiRecvReady == TRUE)
         {
+            printf("串口指令: ");
             for (int i = 0; i < ulWifiRecvSize; ++i)
             {
                 printf("%02x ", ucWifiRecvBuffer[i]);
+                HAL_UART_Transmit(&UartDeviceHandle, (uint8_t *)(ucWifiRecvBuffer + i), 1, 1000);
             }
             printf("\n");
             ucWifiRecvReady = FALSE;
