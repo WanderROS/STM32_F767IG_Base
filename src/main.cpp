@@ -3,6 +3,8 @@ using namespace std;
 #include "ArduinoJson.h"
 #include "commandParser.hpp"
 #include "systemConfig.hpp"
+#include "deviceOrderProcess.hpp"
+#include "wifiOrderProcess.hpp"
 // C 库依赖
 extern "C"
 {
@@ -62,32 +64,13 @@ int main()
     systemConfig.readFile2Config();
     systemConfig.showSystemConfig();
     CommandParser cmdParser;
+    DeviceOrder deviceOrder;
+    WiFiOrder wifiOrder;
     while (1)
     {
         HAL_Delay(10);
-        if (ucDeviceRecvReady == TRUE)
-        {
-            printf("设备指令: ");
-            for (int i = 0; i < ulDeviceRecvSize; ++i)
-            {
-                printf("%02x ", ucDeviceRecvBuffer[i]);
-                HAL_UART_Transmit(&UartWiFiHandle, (uint8_t *)(ucDeviceRecvBuffer + i), 1, 1000);
-            }
-            printf("\n");
-            ucDeviceRecvReady = FALSE;
-        }
-        if (ucWifiRecvReady == TRUE)
-        {
-            printf("串口指令: ");
-            for (int i = 0; i < ulWifiRecvSize; ++i)
-            {
-                printf("%02x ", ucWifiRecvBuffer[i]);
-                HAL_UART_Transmit(&UartDeviceHandle, (uint8_t *)(ucWifiRecvBuffer + i), 1, 1000);
-            }
-            printf("\n");
-            ucWifiRecvReady = FALSE;
-        }
-        // UsartWiFi_SendString("hello");
+        deviceOrder.coreProcess();
+        wifiOrder.coreProcess();
         cmdParser.commandProcess();
     }
     return 0;
