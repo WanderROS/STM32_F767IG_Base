@@ -97,7 +97,7 @@ private:
         funcMap.insert(make_pair("set", &CmdDevice::setDeviceValues));
         funcMap.insert(make_pair("help", &CmdDevice::displayCmds));
         funcDescMap.insert(make_pair("save", "保存设备变量,example: {\"cmd\":\"device\",\"op\":\"save\"}"));
-        funcDescMap.insert(make_pair("set", "设置设备变量,example: {\"cmd\":\"device\",\"op\":\"set\",\"boolCheatA0\":true,\"projectNo\":13104,\"sn\":\"0000DB99138104887734179988880003\",\"boolCheatSN\":true}"));
+        funcDescMap.insert(make_pair("set", "设置设备变量,example: {\"cmd\":\"device\",\"op\":\"set\",\"boolCheatA0\":true,\"projectNo\":13104,\"sn\":\"0000DB39188888888341800000130000\",\"boolCheatSN\":true}"));
         funcDescMap.insert(make_pair("help", "帮助,example: {\"cmd\":\"device\",\"op\":\"help\"}"));
     }
     // 传入函数名，执行对应的函数

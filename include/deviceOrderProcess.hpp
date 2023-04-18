@@ -55,6 +55,8 @@ public:
         cout << "/***********************************************/" << endl;
         cout << ">> 是否欺骗A0  boolCheatA0:     " << boolCheatA0 << endl;
         cout << ">> 设备项目号 projectNo:    " << projectNo << endl;
+        cout << ">> 是否欺骗SN  boolCheatSN:     " << boolCheatSN << endl;
+        cout << ">> 设备SN  :    " << sn << endl;
         cout << endl;
     }
 
@@ -269,6 +271,27 @@ private:
             {
                 buffer[i] = sn.at(i - 10);
             }
+            // 如果是 DA DB DC D9，则无需修改sn的品类码，其他的则需要使用命令重新固化sn到配置文件中
+            if (buffer[2] == 0xdb)
+            {
+                buffer[14] = 'D';
+                buffer[15] = 'B';
+            }
+            else if (buffer[2] == 0xdc)
+            {
+                buffer[14] = 'D';
+                buffer[15] = 'C';
+            }
+            else if (buffer[2] == 0xda)
+            {
+                buffer[14] = 'D';
+                buffer[15] = 'A';
+            }
+            else if (buffer[2] == 0xd9)
+            {
+                buffer[14] = 'D';
+                buffer[15] = '9';
+            }
         }
         buffer[len - 1] = orderCheckSum(buffer, len);
     }
@@ -322,6 +345,7 @@ private:
         doc["projectNo"] = projectNo;
         doc["boolCheatA0"] = boolCheatA0;
         doc["boolCheatSN"] = boolCheatSN;
+        doc["sn"] = sn;
         return doc;
     }
     /* 反序列化 */
@@ -341,7 +365,7 @@ private:
         }
         if (!doc["sn"].isNull())
         {
-            const char * _sn = doc["sn"];
+            const char *_sn = doc["sn"];
             sn = _sn;
         }
         cout << ">> 反序列化成功." << endl;
@@ -352,7 +376,7 @@ private:
     bool boolCheatA0 = false;
     // 欺骗 SN
     bool boolCheatSN = true;
-    string sn = "0000DB99138104887734179988880003";
+    string sn = "0000DB39188888888341800000130000";
     /* 配置保存文件名 */
     string defaultConfigFile = "device.txt";
 };
