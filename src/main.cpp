@@ -54,14 +54,12 @@ int main()
     UartWiFi_USART_Config();
     /* 初始化 LED */
     LED_GPIO_Config();
-    cout << "STM32 F767IGT6 调试串口初始化成功！" << endl;
-    printf("****** 这是一个SPI FLASH 文件系统实验 ******\r\n");
     // 链接驱动器，创建盘符
     FATFS_LinkDriver(&QSPI_Driver, QSPIPath);
 
     /*初始化SDRAM模块*/
     SDRAM_Init();
-    SDRAM_Test();
+    // SDRAM_Test();
     systemConfig.readFile2Config();
     systemConfig.showSystemConfig();
     deviceOrder.readFile2Config();
